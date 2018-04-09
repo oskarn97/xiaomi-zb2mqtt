@@ -232,7 +232,17 @@ function initShepherd() {
                         }
 
                         if (msg.data.data['65281'] && Array.isArray(msg.data.data['65281']) && msg.data.data['65281'].length > 1) {
-                            client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', msg.data.data['65281'][0]['data'].toString());
+                            var battery =  msg.data.data['65281'][0]['data'];
+                            var minvolt = 2500; //2.5V as minimum allowed voltage
+                            var maxvolt = 3000; //3.0V as maximum allowed voltage
+                            if (battery > maxvolt){
+                              battery = maxvolt;
+                            }else if (battery < minvolt){
+                              battery = minvolt;
+                            }
+                            var result = (battery - minvolt) / (maxvolt - minvolt);
+                            var battery_prc = (result * 100).toFixed(2); //Result to %
+                            client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', battery_prc.toString());
                         }
                         break;
 
