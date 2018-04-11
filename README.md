@@ -25,7 +25,7 @@ $ cd xiaomi-zb2mqtt
 ```
 ### Supports
 * Buttons - Single, double, triple, quad and "more than five" click. Push and hold long click. 
-* Aqara Smart Wireless Wall Switch (both Single and Double Key)
+* Aqara Smart Wireless Wall Switch (both Single and Double Key) with remote click feature (only tested on QBKG03LM).
 * Temperature Hudimity sensor with Temperature, Humidity and Pressure (Aqara definitely works, Classic not tested but most likely also)
 * Xiaomi Smart Home Human Body Sensor (Aqara definitely works, Classic not tested but most likely also)
 * Xiaomi Window Door Sensor (both Aqara and Classic)
@@ -41,3 +41,9 @@ mosquitto_pub -t xiaomi/cmnd/bridge/pair -m 60
 ```
 * Unlike the gateway, the stick does not know the exact characteristics of each Xiaomi device. That is why pairing takes up to 60 seconds to finish. It is important that during this time, the device stays awake. Otherwise, pairing fails.
 Except the Wireless Wall Switches, you need to tap (not hold!) the reset button of the device every 3-4 seconds to keep it awake while paring until the confirmation appears. If you see the "cannot get Node descriptior" exception in the log, the device went to sleep and you need to try it again. Once successfully paired, the device works perfectly reliable.
+
+### Remote commands
+* To send a click command to wall switch just send mqtt message to the topic: {base_topic}/cmnd/bridge/send/{dev_id}/{channel_number} i.e.:
+```sh  
+mosquitto_pub -t xiaomi/cmnd/bridge/send/0x0000ffff0000ffff/1 -m 1
+```

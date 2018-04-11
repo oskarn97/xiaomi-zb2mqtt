@@ -65,7 +65,19 @@ client.on('message', function(topic, message) {
                         });
                         console.log("Pairing enabled for " + duration + " seconds");
 
-                    }
+                    } else if (path == 'send') {
+                                var element = array[2]; // element ID
+                                var channel = parseInt(array[3], 10); // channel ID
+                                console.log("element: ", channel, " channel: ", channel);
+                                var dev = shepherd.find(element, (channel + 1)); //channelID starts on 2 so always one more
+                                if ( typeof dev !== 'undefined' && dev ) { //returns undefined if not found
+                                        dev.getSimpleDesc();
+                                        dev.functional('genOnOff', 'toggle', {}, function (err, rsp) {
+                                        if (!err) //error control
+                                            console.log(rsp);
+                                        });
+                                }
+					}
                 } else {
                     if (path == 'unpair') {
                         try {
@@ -249,9 +261,8 @@ function initShepherd() {
                     case 'genOnOff': // various switches
                         pl = msg.data.data['onOff'];
                         if (modelId.match(/magnet/)) pl = pl ? 'open' : 'close'
-                        if (modelId.match(/86sw(1|2)/)) { //one or two channel wall switch
+                        if (modelId.match(/86sw(1|2)/) || modelId.match(/ctrl_neutral2/)) { //one or two channel wall switch and QBKG03LM
                             topic += '/channel_' + (msg.endpoints[0].epId - 1);
-                            pl = 'click';
                         } else topic += '/state';
                         break;
                     case 'msTemperatureMeasurement': // Aqara Temperature/Humidity
