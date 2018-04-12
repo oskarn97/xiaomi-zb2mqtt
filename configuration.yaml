@@ -8,3 +8,5 @@ default:
     port: /dev/ttyACM0
   zigbee:
     bridge: "bridge"
+  #Battery as voltage or percentage
+  battery: voltage
