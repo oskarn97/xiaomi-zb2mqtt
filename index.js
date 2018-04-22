@@ -65,7 +65,19 @@ client.on('message', function(topic, message) {
                         });
                         console.log("Pairing enabled for " + duration + " seconds");
 
-                    }
+                    } else if (path == 'send') {
+                                var element = array[2]; // element ID
+                                var channel = parseInt(array[3], 10); // channel ID
+                                console.log("element: ", channel, " channel: ", channel);
+                                var dev = shepherd.find(element, (channel + 1)); //channelID starts on 2 so always one more
+                                if ( typeof dev !== 'undefined' && dev ) { //returns undefined if not found
+                                        dev.getSimpleDesc();
+                                        dev.functional('genOnOff', 'toggle', {}, function (err, rsp) {
+                                        if (!err) //error control
+                                            console.log(rsp);
+                                        });
+                                }
+					}
                 } else {
                     if (path == 'unpair') {
                         try {
@@ -232,7 +244,21 @@ function initShepherd() {
                         }
 
                         if (msg.data.data['65281'] && Array.isArray(msg.data.data['65281']) && msg.data.data['65281'].length > 1) {
-                            client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', msg.data.data['65281'][0]['data'].toString());
+                            if (settings.battery == "percentage") {
+                                var battery =  msg.data.data['65281'][0]['data'];
+                                var minvolt = 2500; //2.5V as minimum allowed voltage
+                                var maxvolt = 3000; //3.0V as maximum allowed voltage
+                                if (battery > maxvolt){
+                                  battery = maxvolt;
+                                }else if (battery < minvolt){
+                                  battery = minvolt;
+                                }
+                                var result = (battery - minvolt) / (maxvolt - minvolt);
+                                var battery_prc = (result * 100).toFixed(2); //Result to %
+                                client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', battery_prc.toString());
+                            } else {
+                                client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', msg.data.data['65281'][0]['data'].toString());
+                            }
                         }
                         break;
 
@@ -242,6 +268,8 @@ function initShepherd() {
                         if (modelId.match(/86sw(1|2)/)) { //one or two channel wall switch
                             topic += '/channel_' + (msg.endpoints[0].epId - 1);
                             pl = 'click';
+                        } else if (modelId.match(/ctrl_neutral2/)) { //QBKG03LM
+                            topic += '/channel_' + (msg.endpoints[0].epId - 1);
                         } else topic += '/state';
                         break;
                     case 'msTemperatureMeasurement': // Aqara Temperature/Humidity
