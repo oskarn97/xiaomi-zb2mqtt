@@ -243,9 +243,17 @@ function initShepherd() {
                             }
                         }
 
+                        var battery;
                         if (msg.data.data['65281'] && Array.isArray(msg.data.data['65281']) && msg.data.data['65281'].length > 1) {
+	                        battery = msg.data.data['65281'][0]['data'];
+	                    }
+
+	                    if (msg.data.data['65282'] && Array.isArray(msg.data.data['65282']) && msg.data.data['65282'].length > 1) {
+	                        battery = msg.data.data['65282'][1];
+	                    }
+
+                        if (battery) {
                             if (settings.battery == "percentage") {
-                                var battery =  msg.data.data['65281'][0]['data'];
                                 var minvolt = 2500; //2.5V as minimum allowed voltage
                                 var maxvolt = 3000; //3.0V as maximum allowed voltage
                                 if (battery > maxvolt){
@@ -257,7 +265,7 @@ function initShepherd() {
                                 var battery_prc = (result * 100).toFixed(2); //Result to %
                                 client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', battery_prc.toString());
                             } else {
-                                client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', msg.data.data['65281'][0]['data'].toString());
+                                client.publish(settings.mqtt.base_topic+'/' + msg.endpoints[0].device.ieeeAddr + '/battery_level', battery.toString());
                             }
                         }
                         break;
