@@ -37,6 +37,10 @@ var client = mqtt.connect('mqtt://'+settings.mqtt.server,options, {
 var fs = require('fs');
 const readline = require('readline');
 
+try {
+	fs.rename(__dirname + '/node_modules/zigbee-shepherd/lib/database/dev.db', __dirname + '/devices.db');
+} catch (e){}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -176,7 +180,8 @@ function initShepherd() {
     shepherd = new ZShepherd(serial_port.toString(), {
         net: {
             panId: 0x1a62
-        }
+        },
+        dbPath: `${__dirname}/devices.db`
     });
 
     shepherd.on('ready', function() {
