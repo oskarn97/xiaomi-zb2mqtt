@@ -1,4 +1,5 @@
 default: 
+  dbfile: devices.db
   mqtt: 
     server: localhost
     #user: username
