@@ -38,7 +38,7 @@ var fs = require('fs');
 const readline = require('readline');
 
 try {
-	fs.rename(__dirname + '/node_modules/zigbee-shepherd/lib/database/dev.db', __dirname + '/devices.db');
+	fs.rename(__dirname + '/node_modules/zigbee-shepherd/lib/database/dev.db', __dirname + '/' + settings.dbfile);
 } catch (e){}
 
 const rl = readline.createInterface({
@@ -181,7 +181,7 @@ function initShepherd() {
         net: {
             panId: 0x1a62
         },
-        dbPath: `${__dirname}/devices.db`
+        dbPath: `${__dirname}/${settings.dbfile}`
     });
 
     shepherd.on('ready', function() {
